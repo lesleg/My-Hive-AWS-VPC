@@ -35,4 +35,4 @@ terraform.rc
 
 .terraform/
 .idea/
-.DS_store/
+.DS_Store/
