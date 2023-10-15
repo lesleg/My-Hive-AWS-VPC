@@ -27,7 +27,7 @@ pipeline {
             steps {
                 dir(TF_PATH) {
                     script {
-                        sh "terraform init"
+                        sh "/usr/local/bin/terraform init"
                     }
                 }
             }
@@ -37,7 +37,7 @@ pipeline {
             steps {
                 dir(TF_PATH) {
                     script {
-                        sh "terraform validate"
+                        sh "/usr/local/bin/terraform validate"
                     }
                 }
             }
@@ -47,7 +47,7 @@ pipeline {
             steps {
                 dir(TF_PATH) {
                     script {
-                        sh "terraform plan -var-file=${TF_VAR_FILE}"
+                        sh "/usr/local/bin/terraform plan -var-file=${TF_VAR_FILE}"
                     }
                 }
             }
@@ -57,7 +57,7 @@ pipeline {
             steps {
                 dir(TF_PATH) {
                     script {
-                        sh "terraform apply -var-file=${TF_VAR_FILE} -auto-approve"
+                        sh "/usr/local/bin/terraform apply -var-file=${TF_VAR_FILE} -auto-approve"
                     }
                 }
             }
