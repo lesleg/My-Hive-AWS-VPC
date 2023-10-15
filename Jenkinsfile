@@ -11,7 +11,7 @@ pipeline {
             steps {
                 script {
                     // Set the PATH
-                    withEnv(["PATH+TERRAFORM=/usr/local/bin"]) {
+                    withEnv(["PATH+TERRAFORM=/usr/local/bin/terraform"]) {
                         sh "echo 'Current PATH: $PATH'"
                     }
 
