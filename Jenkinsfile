@@ -4,6 +4,7 @@ pipeline {
     environment {
         TF_PATH = "/Users/andrewleslie/Library/CloudStorage/OneDrive-Personal/Documents/myawscode/My Hive AWS VPC"
         TF_VAR_FILE = "user.tfvars"
+        TERRAFORM_ACTION = "apply" // Default action, can be overwritten by the input step.
     }
 
     stages {
@@ -53,11 +54,35 @@ pipeline {
             }
         }
 
-        stage('Terraform Apply') {
+        stage('Select Terraform Action') {
+            steps {
+                script {
+                    TERRAFORM_ACTION = input(message: 'Select Terraform action:', parameters: [choice(choices: 'apply\ndestroy', description: 'Choose terraform action to execute.')])
+                }
+            }
+        }
+
+        stage('Terraform Apply/Destroy') {
+            when {
+                expression { TERRAFORM_ACTION == 'apply' }
+            }
             steps {
                 dir(TF_PATH) {
                     script {
                         sh "/usr/local/bin/terraform apply -var-file=${TF_VAR_FILE} -auto-approve"
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Destroy') {
+            when {
+                expression { TERRAFORM_ACTION == 'destroy' }
+            }
+            steps {
+                dir(TF_PATH) {
+                    script {
+                        sh "/usr/local/bin/terraform destroy -var-file=${TF_VAR_FILE} -auto-approve"
                     }
                 }
             }
