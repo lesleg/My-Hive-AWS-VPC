@@ -4,7 +4,8 @@ pipeline {
     environment {
         TF_PATH = "/Users/andrewleslie/Library/CloudStorage/OneDrive-Personal/Documents/myawscode/My Hive AWS VPC"
         TF_VAR_FILE = "user.tfvars"
-        TERRAFORM_ACTION = "apply" // Default action, can be overwritten by the input step.
+        // Initialize the TERRAFORM_ACTION variable; it will be updated based on user input later.
+        TERRAFORM_ACTION = ""
     }
 
     stages {
@@ -17,8 +18,8 @@ pipeline {
                     }
 
                     // Navigate to the directory
-                    dir(TF_PATH) {
-                        echo "Navigated to ${TF_PATH}"
+                    dir(env.TF_PATH) {
+                        echo "Navigated to ${env.TF_PATH}"
                     }
                 }
             }
@@ -26,7 +27,7 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                dir(TF_PATH) {
+                dir(env.TF_PATH) {
                     script {
                         sh "/usr/local/bin/terraform init"
                     }
@@ -36,7 +37,7 @@ pipeline {
 
         stage('Terraform Validate') {
             steps {
-                dir(TF_PATH) {
+                dir(env.TF_PATH) {
                     script {
                         sh "/usr/local/bin/terraform validate"
                     }
@@ -46,57 +47,52 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                dir(TF_PATH) {
+                dir(env.TF_PATH) {
                     script {
-                        sh "/usr/local/bin/terraform plan -var-file=${TF_VAR_FILE}"
+                        sh "/usr/local/bin/terraform plan -var-file=${env.TF_VAR_FILE}"
                     }
                 }
             }
         }
 
         stage('Select Terraform Action') {
-    steps {
-        script {
-            // Prompt the user to select a Terraform action. This will pause the pipeline execution until input is received.
-            TERRAFORM_ACTION = input(
-                message: 'Select Terraform action:', 
-                parameters: [
-                    choice(
-                        choices: ['apply', 'destroy'].join('\n'), // Presents two options: apply or destroy
-                        description: 'Choose terraform action to execute.'
+            steps {
+                script {
+                    // Use the script block to update the environment variable based on user input
+                    env.TERRAFORM_ACTION = input(
+                        id: 'userInput', // It's a good practice to assign an ID for the input step
+                        message: 'Select Terraform action:',
+                        parameters: [
+                            choice(
+                                name: 'CHOICE', // Name of the variable that will hold the user's choice
+                                choices: ['apply', 'destroy'],
+                                description: 'Choose terraform action to execute.'
+                            )
+                        ]
                     )
-                ]
-            )
-            // Execution will only continue once the user has made a selection.
+                }
+            }
         }
-    }
-}
-
 
         stage('Terraform Apply/Destroy') {
             when {
-                expression { TERRAFORM_ACTION == 'apply' }
-            }
-            steps {
-                dir(TF_PATH) {
-                    script {
-                        sh "/usr/local/bin/terraform apply -var-file=${TF_VAR_FILE} -auto-approve"
-                    }
+                anyOf {
+                    expression { env.TERRAFORM_ACTION == 'apply' }
+                    expression { env.TERRAFORM_ACTION == 'destroy' }
                 }
             }
-        }
-
-        stage('Terraform Destroy') {
-            when {
-                expression { TERRAFORM_ACTION == 'destroy' }
-            }
             steps {
-                dir(TF_PATH) {
+                dir(env.TF_PATH) {
                     script {
-                        sh "/usr/local/bin/terraform destroy -var-file=${TF_VAR_FILE} -auto-approve"
+                        if (env.TERRAFORM_ACTION == 'apply') {
+                            sh "/usr/local/bin/terraform apply -var-file=${env.TF_VAR_FILE} -auto-approve"
+                        } else if (env.TERRAFORM_ACTION == 'destroy') {
+                            sh "/usr/local/bin/terraform destroy -var-file=${env.TF_VAR_FILE} -auto-approve"
+                        }
                     }
                 }
             }
         }
     }
 }
+
