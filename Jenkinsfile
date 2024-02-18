@@ -4,8 +4,7 @@ pipeline {
     environment {
         TF_PATH = "/Users/andrewleslie/Library/CloudStorage/OneDrive-Personal/Documents/myawscode/My Hive AWS VPC"
         TF_VAR_FILE = "user.tfvars"
-        // Initialize TERRAFORM_ACTION with a default value, can still be overridden.
-        TERRAFORM_ACTION = "apply"
+        TERRAFORM_ACTION = "apply" // Default action, can be overwritten by the input step.
     }
 
     stages {
@@ -18,8 +17,8 @@ pipeline {
                     }
 
                     // Navigate to the directory
-                    dir(env.TF_PATH) {
-                        echo "Navigated to ${env.TF_PATH}"
+                    dir(TF_PATH) {
+                        echo "Navigated to ${TF_PATH}"
                     }
                 }
             }
@@ -27,9 +26,9 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                dir(env.TF_PATH) {
+                dir(TF_PATH) {
                     script {
-                        sh "terraform init"
+                        sh "/usr/local/bin/terraform init"
                     }
                 }
             }
@@ -37,9 +36,9 @@ pipeline {
 
         stage('Terraform Validate') {
             steps {
-                dir(env.TF_PATH) {
+                dir(TF_PATH) {
                     script {
-                        sh "terraform validate"
+                        sh "/usr/local/bin/terraform validate"
                     }
                 }
             }
@@ -47,30 +46,41 @@ pipeline {
 
         stage('Terraform Plan') {
             steps {
-                dir(env.TF_PATH) {
+                dir(TF_PATH) {
                     script {
-                        sh "terraform plan -var-file=${env.TF_VAR_FILE}"
+                        sh "/usr/local/bin/terraform plan -var-file=${TF_VAR_FILE}"
                     }
                 }
             }
         }
 
         stage('Select Terraform Action') {
-            steps {
-                script {
-                    env.TERRAFORM_ACTION = input(message: 'Select Terraform action:', parameters: [choice(choices: ['apply', 'destroy'], description: 'Choose terraform action to execute.')])
-                }
-            }
+    steps {
+        script {
+            // Prompt the user to select a Terraform action. This will pause the pipeline execution until input is received.
+            TERRAFORM_ACTION = input(
+                message: 'Select Terraform action:', 
+                parameters: [
+                    choice(
+                        choices: ['apply', 'destroy'].join('\n'), // Presents two options: apply or destroy
+                        description: 'Choose terraform action to execute.'
+                    )
+                ]
+            )
+            // Execution will only continue once the user has made a selection.
         }
+    }
+}
+
 
         stage('Terraform Apply/Destroy') {
             when {
-                expression { env.TERRAFORM_ACTION == 'apply' }
+                expression { TERRAFORM_ACTION == 'apply' }
             }
             steps {
-                dir(env.TF_PATH) {
+                dir(TF_PATH) {
                     script {
-                        sh "terraform apply -var-file=${env.TF_VAR_FILE} -auto-approve"
+                        sh "/usr/local/bin/terraform apply -var-file=${TF_VAR_FILE} -auto-approve"
                     }
                 }
             }
@@ -78,16 +88,15 @@ pipeline {
 
         stage('Terraform Destroy') {
             when {
-                expression { env.TERRAFORM_ACTION == 'destroy' }
+                expression { TERRAFORM_ACTION == 'destroy' }
             }
             steps {
-                dir(env.TF_PATH) {
+                dir(TF_PATH) {
                     script {
-                        sh "/usr/local/bin/terraform destroy -var-file=${env.TF_VAR_FILE} -auto-approve"
+                        sh "/usr/local/bin/terraform destroy -var-file=${TF_VAR_FILE} -auto-approve"
                     }
                 }
             }
         }
     }
 }
-
