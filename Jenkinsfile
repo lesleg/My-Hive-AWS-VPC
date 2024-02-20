@@ -19,7 +19,7 @@ pipeline {
                         parameters: [
                             choice(
                                 name: 'CHOICE',
-                                choices: ['apply', 'destroy'],
+                                choices: ['apply', 'destroy', 'plan'],
                                 description: 'Choose terraform action to execute.'
                             )
                         ]
@@ -29,20 +29,25 @@ pipeline {
         }
 
         stage('Terraform Apply/Destroy') {
-            steps {
-                script {
-                    // Now, TERRAFORM_ACTION is a script-level Groovy variable
-                    if (TERRAFORM_ACTION == 'apply') {
-                        dir(env.TF_PATH) {
-                            sh "/usr/local/bin/terraform apply -var-file=${env.TF_VAR_FILE} -auto-approve"
-                        }
-                    } else if (TERRAFORM_ACTION == 'destroy') {
-                        dir(env.TF_PATH) {
-                            sh "/usr/local/bin/terraform destroy -var-file=${env.TF_VAR_FILE} -auto-approve"
-                        }
-                    }
+    steps {
+        script {
+            // Now, TERRAFORM_ACTION is a script-level Groovy variable
+            if (TERRAFORM_ACTION == 'apply') {
+                dir(env.TF_PATH) {
+                    sh "/usr/local/bin/terraform apply -var-file=${env.TF_VAR_FILE} -auto-approve"
+                }
+            } else if (TERRAFORM_ACTION == 'destroy') {
+                dir(env.TF_PATH) {
+                    sh "/usr/local/bin/terraform destroy -var-file=${env.TF_VAR_FILE} -auto-approve"
+                }
+            } else if (TERRAFORM_ACTION == 'plan') {
+                dir(env.TF_PATH) {
+                    sh "/usr/local/bin/terraform plan -var-file=${env.TF_VAR_FILE}"
                 }
             }
         }
+    }
+}
+
     }
 }
