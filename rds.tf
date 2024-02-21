@@ -42,7 +42,7 @@ resource "aws_db_instance" "default" {
   identifier                = var.rds_instance_identifier
   allocated_storage         = 5
   engine                    = "mysql"
-  engine_version            = "8.0.36"
+  engine_version            = "8.0.34"
   instance_class            = "db.t2.micro"
   name                   = var.database_name
   username                  = var.database_user
