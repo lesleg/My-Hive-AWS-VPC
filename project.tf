@@ -136,7 +136,7 @@ resource "aws_alb_target_group" "group" {
   }
   # Alter the destination of the health check to be the login page.
   health_check {
-    path = "/terraform.lesleg.click"
+    path = "/login"
     port = 80
   }
 }
