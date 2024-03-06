@@ -5,7 +5,7 @@ route53_hosted_zone_name   = "lesleg.click"
 
 rds_instance_identifier    = "terraform-mysql"
 database_name              = "Andrew_terraform_test_db"
-database_user              = "databaser_user_andrew"
+database_user              = "terraform"
 
 s3_bucket_name             = "springboot-s3-example"
 
