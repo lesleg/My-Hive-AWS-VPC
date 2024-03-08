@@ -134,12 +134,18 @@ resource "aws_alb_target_group" "group" {
   stickiness {
     type = "lb_cookie"
   }
-  # Alter the destination of the health check to be the login page.
   health_check {
-    path = "/terraform.lesleg.click/login"
-    port = 80
+    path                = "/login"
+    port                = "443"
+    protocol            = "HTTPS"
+    matcher             = "200"
+    timeout             = 10    # Time in seconds to wait for a response
+    interval            = 30    # Time in seconds between health checks
+    healthy_threshold   = 3     # Number of consecutive successful health checks before considering an unhealthy target healthy
+    unhealthy_threshold = 3     # Number of consecutive failed health checks before considering a healthy target unhealthy
   }
 }
+
 
 resource "aws_alb_listener" "listener_http" {
   load_balancer_arn = aws_alb.andrew_alb.arn
