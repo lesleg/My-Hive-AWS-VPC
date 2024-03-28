@@ -42,9 +42,9 @@ resource "aws_db_instance" "default" {
   identifier                = var.rds_instance_identifier
   allocated_storage         = 5
   engine                    = "mysql"
-  engine_version            = "5.7.44"
-  instance_class            = "db.t2.micro"
-  name                   = var.database_name
+  engine_version            = "5.7.44"  # Verify if this version is compatible with the new instance class
+  instance_class            = "db.t3.micro"  # Updated instance class
+  name                      = var.database_name
   username                  = var.database_user
   password                  = var.database_password
   db_subnet_group_name      = aws_db_subnet_group.default.id
@@ -52,6 +52,7 @@ resource "aws_db_instance" "default" {
   skip_final_snapshot       = true
   final_snapshot_identifier = "Ignore"
 }
+
 
 resource "aws_db_parameter_group" "default" {
   name        = "${var.rds_instance_identifier}-param-group"
