@@ -16,6 +16,8 @@ resource aws_instance "ec2"{
   ]
 }
 
+ec2 0n test branch
+
 resource "aws_security_group" "ec2rule" {
   name        = "Andrew ec2rule security group"
   description = "ec2 rule secgroup description"
