@@ -6,6 +6,11 @@ pipeline {
             choices: ['main', 'testbranch'],
             description: 'Select the Git branch to use.'
         )
+        choice(
+            name: 'TERRAFORM_COMMAND',
+            choices: ['apply', 'destroy', 'plan'],
+            description: 'Choose terraform action to execute.'
+        )
     }
     environment {
         TF_PATH = "/Users/andrewleslie/Library/CloudStorage/OneDrive-Personal/Documents/myawscode/My Hive AWS VPC"
@@ -21,37 +26,19 @@ pipeline {
             }
         }
         // Your previous stages remain unchanged
-        stage('Select Terraform Action') {
+
+        stage('Terraform Apply/Destroy/Plan') {
             steps {
                 script {
-                    // Define a Groovy variable to hold the user's choice. No need to use 'env.' prefix
-                    TERRAFORM_ACTION = input(
-                        id: 'userInput',
-                        message: 'Select Terraform action:',
-                        parameters: [
-                            choice(
-                                name: 'CHOICE',
-                                choices: ['apply', 'destroy', 'plan'],
-                                description: 'Choose terraform action to execute.'
-                            )
-                        ]
-                    )
-                }
-            }
-        }
-        stage('Terraform Apply/Destroy') {
-            steps {
-                script {
-                    // Now, TERRAFORM_ACTION is a script-level Groovy variable
-                    if (TERRAFORM_ACTION == 'apply') {
+                    if (params.TERRAFORM_COMMAND == 'apply') {
                         dir(env.TF_PATH) {
                             sh "/usr/local/bin/terraform apply -var-file=${env.TF_VAR_FILE} -auto-approve"
                         }
-                    } else if (TERRAFORM_ACTION == 'destroy') {
+                    } else if (params.TERRAFORM_COMMAND == 'destroy') {
                         dir(env.TF_PATH) {
                             sh "/usr/local/bin/terraform destroy -var-file=${env.TF_VAR_FILE} -auto-approve"
                         }
-                    } else if (TERRAFORM_ACTION == 'plan') {
+                    } else if (params.TERRAFORM_COMMAND == 'plan') {
                         dir(env.TF_PATH) {
                             sh "/usr/local/bin/terraform plan -var-file=${env.TF_VAR_FILE}"
                         }
