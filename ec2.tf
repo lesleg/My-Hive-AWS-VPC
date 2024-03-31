@@ -3,9 +3,9 @@ resource aws_instance "ec2"{
   instance_type = "t2.micro"
   key_name = "cp-prince"
   associate_public_ip_address = true
-  #subnet_id              = "10.0.1.0/24"
+  subnet_id = aws_subnet.main[0].id
   vpc_security_group_ids = [
-    aws_security_group.ec2rule.id,
+    aws_security_group.default.id,
   ]
 
   tags = {
@@ -15,8 +15,6 @@ resource aws_instance "ec2"{
     aws_subnet.main
   ]
 }
-
-ec2 0n test branch
 
 resource "aws_security_group" "ec2rule" {
   name        = "Andrew ec2rule security group"
