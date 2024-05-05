@@ -5,6 +5,9 @@ amazon-linux-extras install nginx1 -y
 yum install java-1.8.0-openjdk-devel -y
 yum remove java-1.7.0-openjdk -y
 
+# Install MySQL client
+yum install mysql -y
+
 useradd springboot
 chsh -s /sbin/nologin springboot
 
@@ -81,4 +84,6 @@ chkconfig springboot-s3-example on
 
 service nginx start
 service springboot-s3-example start
+
+
 
