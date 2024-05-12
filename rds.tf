@@ -26,6 +26,13 @@ resource "aws_security_group" "rds" {
     protocol        = "tcp"
     security_groups = [aws_security_group.default.id]
   }
+  ingress {
+  from_port   = 3306
+  to_port     = 3306
+  protocol    = "tcp"
+  cidr_blocks = var.allowed_cidr_blocks
+}
+
   # Allow all outbound traffic.
   egress {
     from_port   = 0
