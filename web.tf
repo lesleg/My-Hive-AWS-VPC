@@ -18,6 +18,10 @@ resource "aws_launch_template" "launch_template" {
 
   user_data = base64encode(data.template_file.provision.rendered)
 
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ssm_instance_profile.name
+  }
+
   lifecycle {
     create_before_destroy = true
   }
@@ -42,3 +46,54 @@ resource "aws_autoscaling_group" "autoscaling_group" {
     propagate_at_launch = true
   }
 }
+
+# Define the IAM role
+resource "aws_iam_role" "ssm_role" {
+  name = "ssm-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+# Attach the AmazonSSMManagedInstanceCore policy to the role
+resource "aws_iam_role_policy_attachment" "ssm_policy_attachment" {
+  role       = aws_iam_role.ssm_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+# Create an instance profile
+resource "aws_iam_instance_profile" "ssm_instance_profile" {
+  name = "ssm-instance-profile"
+  role = aws_iam_role.ssm_role.name
+}
+
+resource "aws_iam_role_policy" "ec2_instance_connect_policy" {  # [Added]
+  name = "EC2InstanceConnectPolicy"
+  role = aws_iam_role.ssm_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "ec2-instance-connect:SendSSHPublicKey"  # [Added]
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+
+
