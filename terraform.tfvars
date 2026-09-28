@@ -1,5 +1,5 @@
 region                     = "eu-west-2"
-certificate_arn            = "arn:aws:acm:eu-west-2:183989794756:certificate/5f850bce-90c2-4c49-8236-ac1713848e6f"
+certificate_arn            = "arn:aws:acm:eu-west-2:183989794756:certificate/4c68df7c-b78f-41c8-baa1-e308d1ccfc71"
 route53_hosted_zone_name   = "lesleg.click"
 
 

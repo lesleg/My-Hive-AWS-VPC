@@ -77,13 +77,28 @@ EOF
 chown springboot:springboot /opt/springboot-s3-example/springboot-s3-example.jar
 chmod 500 /opt/springboot-s3-example/springboot-s3-example.jar
 
-ln -s /opt/springboot-s3-example/springboot-s3-example.jar /etc/init.d/springboot-s3-example
+cat << EOF > /etc/systemd/system/springboot-s3-example.service
+[Unit]
+Description=Spring Boot Application
+After=network.target
+
+[Service]
+User=springboot
+EnvironmentFile=/opt/springboot-s3-example/springboot-s3-example.conf
+ExecStart=/usr/bin/java -jar /opt/springboot-s3-example/springboot-s3-example.jar \$RUN_ARGS
+SuccessExitStatus=143
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
 
 chkconfig nginx on
-chkconfig springboot-s3-example on
+systemctl daemon-reload
+systemctl enable springboot-s3-example
 
 service nginx start
-service springboot-s3-example start
+systemctl start springboot-s3-example
 
 
 

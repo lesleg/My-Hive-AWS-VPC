@@ -42,21 +42,27 @@ resource "aws_db_instance" "default" {
   identifier                = var.rds_instance_identifier
   allocated_storage         = 5
   engine                    = "mysql"
-  engine_version            = "8.0.39"
+  engine_version            = "5.7.44-rds.20260902"
   instance_class            = "db.t3.micro"
-  name                   = var.database_name
+  name                      = var.database_name
   username                  = var.database_user
   password                  = var.database_password
   db_subnet_group_name      = aws_db_subnet_group.default.id
+  parameter_group_name      = aws_db_parameter_group.default.name
   vpc_security_group_ids    = [aws_security_group.rds.id]
   skip_final_snapshot       = true
   final_snapshot_identifier = "Ignore"
 }
 
 resource "aws_db_parameter_group" "default" {
-  name        = "${var.rds_instance_identifier}-param-group"
-  description = "Terraform example parameter group for mysql5.6"
-  family      = "mysql5.6"
+  name_prefix = "${var.rds_instance_identifier}-param-group-"
+  description = "Terraform example parameter group for mysql5.7"
+  family      = "mysql5.7"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
   parameter {
     name  = "character_set_server"
     value = "utf8"
